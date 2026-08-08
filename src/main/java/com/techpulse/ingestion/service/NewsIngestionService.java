@@ -52,7 +52,7 @@ public class NewsIngestionService {
             LocalDateTime.now());
         try {
             String fullUrl = newsApiUrl + newsApiKey;
-            logger.debug("Calling NewsAPI with URL: {}", fullUrl);
+            logger.debug("Calling NewsAPI");
 
             NewsApiResponse response = restTemplate.getForObject(
                 fullUrl, NewsApiResponse.class);
