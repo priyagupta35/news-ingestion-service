@@ -1,6 +1,7 @@
 package com.techpulse.ingestion.model;
 
 import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -39,14 +40,13 @@ public class Article {
     private Source source;
 
     // Plain String — matches ENUM column in MySQL directly
-    @Column(name = "type",
-        columnDefinition = "ENUM('EXTERNAL','COMMUNITY')")
-    private String type;
+    @Column(name = "type")
+private String type;
 
     // Plain String — matches ENUM column in MySQL directly
-    @Column(name = "status",
-        columnDefinition = "ENUM('PENDING','APPROVED','REJECTED')")
-    private String status;
+  
+@Column(name = "status")
+private String status;
 
     public Article() {}
 
