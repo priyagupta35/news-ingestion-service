@@ -44,7 +44,8 @@ public class NewsIngestionService {
     @Value("${newsapi.url}")
     private String newsApiUrl;
 
-    private RestTemplate restTemplate = new RestTemplate();
+   @Autowired
+private RestTemplate restTemplate;
 
     @Scheduled(fixedRate = 1800000)
     public void fetchAndStoreArticles() {
