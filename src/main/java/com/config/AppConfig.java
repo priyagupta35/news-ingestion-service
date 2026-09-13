@@ -1,4 +1,4 @@
-   package com.techpulse.ingestion.config;
+   package com.config;
 
    import org.springframework.context.annotation.Bean;
    import org.springframework.context.annotation.Configuration;
