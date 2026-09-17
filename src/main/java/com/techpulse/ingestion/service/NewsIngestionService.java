@@ -42,8 +42,8 @@ public class NewsIngestionService {
     @Value("${newsapi.url}")
     private String newsApiUrl;
 
-    // No @Autowired — created directly
-    private RestTemplate restTemplate = new RestTemplate();
+    // No @Autowired here — created directly
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Scheduled(fixedRate = 1800000)
     public void fetchAndStoreArticles() {
@@ -51,7 +51,7 @@ public class NewsIngestionService {
             LocalDateTime.now());
         try {
             String fullUrl = newsApiUrl + newsApiKey;
-            logger.debug("Calling NewsAPI with URL: {}", fullUrl);
+            logger.debug("Calling NewsAPI: {}", fullUrl);
 
             NewsApiResponse response = restTemplate.getForObject(
                 fullUrl, NewsApiResponse.class);
@@ -65,13 +65,11 @@ public class NewsIngestionService {
 
                     if (articleDto.getTitle() == null ||
                         articleDto.getTitle().equals("[Removed]")) {
-                        logger.warn("Skipping article with null title");
                         skippedCount++;
                         continue;
                     }
 
                     if (articleDto.getUrl() == null) {
-                        logger.warn("Skipping article with null URL");
                         skippedCount++;
                         continue;
                     }
@@ -108,8 +106,8 @@ public class NewsIngestionService {
                     savedCount++;
                 }
 
-                logger.info("News ingestion complete. Saved: {}, " +
-                    "Skipped: {}", savedCount, skippedCount);
+                logger.info("Ingestion complete. Saved: {}, Skipped: {}",
+                    savedCount, skippedCount);
 
             } else {
                 logger.warn("NewsAPI returned null or empty response");
@@ -138,8 +136,7 @@ public class NewsIngestionService {
             return LocalDateTime.parse(dateString,
                 DateTimeFormatter.ISO_DATE_TIME);
         } catch (Exception e) {
-            logger.warn("Could not parse date: {}",
-                dateString);
+            logger.warn("Could not parse date: {}", dateString);
             return LocalDateTime.now();
         }
     }
