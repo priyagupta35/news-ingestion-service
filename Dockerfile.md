@@ -1,36 +1,17 @@
 FROM maven:3.9-eclipse-temurin-17 AS build
 
-
-
 WORKDIR /app
 
-
-
 COPY pom.xml .
-
 COPY src ./src
-
-
 
 RUN mvn clean package -DskipTests
 
-
-
 FROM eclipse-temurin:17-jre
-
-
 
 WORKDIR /app
 
+COPY --from=build /app/target/*.jar app.jar
 
-
-COPY --from=build /app/target/\*.jar app.jar
-
-
-
-EXPOSE 8081
-
-
-
-ENTRYPOINT \["java", "-jar", "app.jar"]
-
+# Dynamically bind to Render's $PORT (10000), falling back to 8081 locally
+ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT:-8081} -jar app.jar"]
