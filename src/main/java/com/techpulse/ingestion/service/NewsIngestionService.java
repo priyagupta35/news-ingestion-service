@@ -33,19 +33,17 @@ public class NewsIngestionService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    // Fix — added missing @Autowired
     @Autowired
     private SourceRepository sourceRepository;
 
-    // Fix — removed final keyword so @Value can inject
     @Value("${newsapi.key}")
     private String newsApiKey;
 
     @Value("${newsapi.url}")
     private String newsApiUrl;
 
-   @Autowired
-private RestTemplate restTemplate;
+    // No @Autowired — created directly
+    private RestTemplate restTemplate = new RestTemplate();
 
     @Scheduled(fixedRate = 1800000)
     public void fetchAndStoreArticles() {
@@ -53,7 +51,7 @@ private RestTemplate restTemplate;
             LocalDateTime.now());
         try {
             String fullUrl = newsApiUrl + newsApiKey;
-            logger.debug("Calling NewsAPI");
+            logger.debug("Calling NewsAPI with URL: {}", fullUrl);
 
             NewsApiResponse response = restTemplate.getForObject(
                 fullUrl, NewsApiResponse.class);
@@ -63,33 +61,23 @@ private RestTemplate restTemplate;
                 int savedCount = 0;
                 int skippedCount = 0;
 
-                logger.debug("NewsAPI returned {} articles",
-                    articles.size());
-
                 for (NewsArticleDto articleDto : articles) {
 
                     if (articleDto.getTitle() == null ||
                         articleDto.getTitle().equals("[Removed]")) {
-                        logger.warn("Skipping article with null or " +
-                            "removed title from source: {}",
-                            articleDto.getSource() != null
-                            ? articleDto.getSource().getName()
-                            : "Unknown");
+                        logger.warn("Skipping article with null title");
                         skippedCount++;
                         continue;
                     }
 
                     if (articleDto.getUrl() == null) {
-                        logger.warn("Skipping article with null URL: {}",
-                            articleDto.getTitle());
+                        logger.warn("Skipping article with null URL");
                         skippedCount++;
                         continue;
                     }
 
                     if (articleRepository.existsByUrl(
                             articleDto.getUrl())) {
-                        logger.debug("Skipping duplicate article: {}",
-                            articleDto.getTitle());
                         skippedCount++;
                         continue;
                     }
@@ -105,11 +93,6 @@ private RestTemplate restTemplate;
                         .findById(1)
                         .orElse(null);
 
-                    if (category == null) {
-                        logger.warn("Default category with ID 1 not " +
-                            "found. Article will have no category.");
-                    }
-
                     Article article = new Article();
                     article.setTitle(articleDto.getTitle());
                     article.setSummary(articleDto.getDescription());
@@ -123,9 +106,6 @@ private RestTemplate restTemplate;
 
                     articleRepository.save(article);
                     savedCount++;
-
-                    logger.debug("Saved article: {}",
-                        articleDto.getTitle());
                 }
 
                 logger.info("News ingestion complete. Saved: {}, " +
@@ -144,7 +124,6 @@ private RestTemplate restTemplate;
     private Source findOrCreateSource(String sourceName) {
         return sourceRepository.findByName(sourceName)
             .orElseGet(() -> {
-                logger.debug("Creating new source: {}", sourceName);
                 Source newSource = new Source();
                 newSource.setName(sourceName);
                 newSource.setWebsiteUrl("");
@@ -159,7 +138,7 @@ private RestTemplate restTemplate;
             return LocalDateTime.parse(dateString,
                 DateTimeFormatter.ISO_DATE_TIME);
         } catch (Exception e) {
-            logger.warn("Could not parse date: {}. Using current time.",
+            logger.warn("Could not parse date: {}",
                 dateString);
             return LocalDateTime.now();
         }
