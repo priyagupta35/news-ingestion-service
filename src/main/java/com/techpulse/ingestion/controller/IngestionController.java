@@ -23,6 +23,14 @@ public class IngestionController {
             "News Ingestion Service is running");
     }
 
+    @Autowired
+private ArticleRepository articleRepository; // (or whatever your repository is named)
+// GET /api/ingestion/articles
+@GetMapping("/articles")
+public ResponseEntity<?> getArticles() {
+    return ResponseEntity.ok(articleRepository.findAll());
+}
+
     // POST /api/ingestion/fetch
     @PostMapping("/fetch")
     public ResponseEntity<String> fetchNews() {
